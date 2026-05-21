@@ -5,7 +5,7 @@
     "description": "REST API for managing a library — books and authors collections.",
     "version": "1.0.0"
   },
-  "host": "YOUR-APP-NAME.onrender.com",
+  "host": "cse341-librarymanager.onrender.com",
   "basePath": "/",
   "schemes": ["https"],
   "paths": {
