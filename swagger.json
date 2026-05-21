@@ -1,0 +1,220 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Library API",
+    "description": "REST API for managing a library — books and authors collections.",
+    "version": "1.0.0"
+  },
+  "host": "YOUR-APP-NAME.onrender.com",
+  "basePath": "/",
+  "schemes": ["https"],
+  "paths": {
+
+    "/books": {
+      "get": {
+        "summary": "Get all books",
+        "description": "Returns a list of all books, with author name populated.",
+        "produces": ["application/json"],
+        "responses": {
+          "200": { "description": "A list of books" },
+          "500": { "description": "Internal server error" }
+        }
+      },
+      "post": {
+        "summary": "Create a new book",
+        "description": "Adds a new book to the library. All fields are required.",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["title","isbn","authorId","genre","publishedYear","pageCount","language","publisher","summary"],
+              "properties": {
+                "title":         { "type": "string",  "example": "The Great Gatsby" },
+                "isbn":          { "type": "string",  "example": "978-0-7432-7356-5" },
+                "authorId":      { "type": "string",  "example": "664f1a2b3c4d5e6f7a8b9c0d" },
+                "genre":         { "type": "string",  "example": "Fiction" },
+                "publishedYear": { "type": "integer", "example": 1925 },
+                "pageCount":     { "type": "integer", "example": 180 },
+                "language":      { "type": "string",  "example": "English" },
+                "publisher":     { "type": "string",  "example": "Scribner" },
+                "summary":       { "type": "string",  "example": "A story of the fabulously wealthy Jay Gatsby..." },
+                "available":     { "type": "boolean", "example": true }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Book created successfully" },
+          "400": { "description": "Validation error or duplicate ISBN" }
+        }
+      }
+    },
+
+    "/books/{id}": {
+      "get": {
+        "summary": "Get a single book by ID",
+        "produces": ["application/json"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Book found" },
+          "404": { "description": "Book not found" },
+          "500": { "description": "Internal server error" }
+        }
+      },
+      "put": {
+        "summary": "Update a book by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title":         { "type": "string" },
+                "isbn":          { "type": "string" },
+                "authorId":      { "type": "string" },
+                "genre":         { "type": "string" },
+                "publishedYear": { "type": "integer" },
+                "pageCount":     { "type": "integer" },
+                "language":      { "type": "string" },
+                "publisher":     { "type": "string" },
+                "summary":       { "type": "string" },
+                "available":     { "type": "boolean" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Book updated successfully" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Book not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a book by ID",
+        "produces": ["application/json"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Book deleted successfully" },
+          "404": { "description": "Book not found" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    },
+
+    "/authors": {
+      "get": {
+        "summary": "Get all authors",
+        "produces": ["application/json"],
+        "responses": {
+          "200": { "description": "A list of authors" },
+          "500": { "description": "Internal server error" }
+        }
+      },
+      "post": {
+        "summary": "Create a new author",
+        "description": "Adds a new author. All fields except website are required.",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["firstName","lastName","email","nationality","birthDate","biography","genres"],
+              "properties": {
+                "firstName":   { "type": "string",  "example": "F. Scott" },
+                "lastName":    { "type": "string",  "example": "Fitzgerald" },
+                "email":       { "type": "string",  "example": "fscott@example.com" },
+                "nationality": { "type": "string",  "example": "American" },
+                "birthDate":   { "type": "string",  "example": "1896-09-24" },
+                "biography":   { "type": "string",  "example": "American novelist known for The Great Gatsby..." },
+                "website":     { "type": "string",  "example": "https://fscottfitzgerald.com" },
+                "genres":      { "type": "array", "items": { "type": "string" }, "example": ["Fiction","Classic"] },
+                "active":      { "type": "boolean", "example": true }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": { "description": "Author created successfully" },
+          "400": { "description": "Validation error or duplicate email" }
+        }
+      }
+    },
+
+    "/authors/{id}": {
+      "get": {
+        "summary": "Get a single author by ID",
+        "produces": ["application/json"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Author found" },
+          "404": { "description": "Author not found" },
+          "500": { "description": "Internal server error" }
+        }
+      },
+      "put": {
+        "summary": "Update an author by ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "firstName":   { "type": "string" },
+                "lastName":    { "type": "string" },
+                "email":       { "type": "string" },
+                "nationality": { "type": "string" },
+                "birthDate":   { "type": "string" },
+                "biography":   { "type": "string" },
+                "website":     { "type": "string" },
+                "genres":      { "type": "array", "items": { "type": "string" } },
+                "active":      { "type": "boolean" }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Author updated successfully" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Author not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete an author by ID",
+        "produces": ["application/json"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Author deleted successfully" },
+          "404": { "description": "Author not found" },
+          "500": { "description": "Internal server error" }
+        }
+      }
+    }
+  }
+}
