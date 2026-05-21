@@ -5,7 +5,7 @@ const doc = {
     title: 'Library API',
     description: 'REST API for managing a library — books and authors collections.',
   },
-  host: 'YOUR-APP-NAME.onrender.com',
+  host: 'cse341-librarymanager.onrender.com',
   schemes: ['https'],
 };
 

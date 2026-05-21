@@ -16,6 +16,10 @@ app.use(express.json());
 app.use('/books', require('./routes/books'));
 app.use('/authors', require('./routes/authors'));
 
+//home route
+app.get("/", (req, res) => {
+  res.send("<h2>Welcome to Library Management System by Abiodun Babayode.</h2>");
+});
 
 
 // Start server
