@@ -2,6 +2,7 @@ const Author = require('../models/authors');
 
 // GET all authors
 const getAllAuthors = async (req, res) => {
+  console.log('Fetching all authors');
   try {
     const authors = await Author.find({});
     res.status(200).json(authors);
