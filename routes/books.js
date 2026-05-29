@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { isAuthenticated } = require('../middleware/auth');
 
 const {
   getAllBooks,
@@ -9,19 +10,13 @@ const {
   deleteBook
 } = require('../controllers/books');
 
-// GET all books
+// PUBLIC — anyone can read
 router.get('/', getAllBooks);
-
-// GET single book
 router.get('/:id', getSingleBook);
 
-// POST new book
-router.post('/', createBook);
-
-// PUT update book
-router.put('/:id', updateBook);
-
-// DELETE book
-router.delete('/:id', deleteBook);
+// PROTECTED — must be logged in via OAuth
+router.post('/', isAuthenticated, createBook);
+router.put('/:id', isAuthenticated, updateBook);
+router.delete('/:id', isAuthenticated, deleteBook);
 
 module.exports = router;

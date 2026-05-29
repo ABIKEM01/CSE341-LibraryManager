@@ -2,18 +2,71 @@
   "swagger": "2.0",
   "info": {
     "title": "Library API",
-    "description": "REST API for managing a library — books and authors collections.",
+    "description": "REST API for managing a library — books and authors collections. Protected routes require GitHub OAuth login at /auth/github.",
     "version": "1.0.0"
   },
   "host": "cse341-librarymanager.onrender.com",
   "basePath": "/",
   "schemes": ["https"],
+  "securityDefinitions": {
+    "githubOAuth": {
+      "type": "oauth2",
+      "authorizationUrl": "https://cse341-librarymanager.onrender.com/auth/github",
+      "flow": "implicit",
+      "scopes": {
+        "user:email": "Read user email from GitHub"
+      }
+    }
+  },
   "paths": {
+
+    "/auth/github": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Login with GitHub OAuth",
+        "description": "Redirects the user to GitHub to authenticate. After approval, GitHub redirects to /auth/github/callback.",
+        "responses": {
+          "302": { "description": "Redirect to GitHub" }
+        }
+      }
+    },
+    "/auth/github/callback": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "GitHub OAuth callback",
+        "description": "GitHub redirects here after authentication. On success, redirects to /auth/profile.",
+        "responses": {
+          "302": { "description": "Redirect to /auth/profile on success" },
+          "401": { "description": "Authentication failed" }
+        }
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Get logged-in user profile",
+        "description": "Returns the currently authenticated user's GitHub profile.",
+        "responses": {
+          "200": { "description": "User profile returned" },
+          "401": { "description": "Not authenticated" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Logout",
+        "description": "Destroys the session and logs the user out.",
+        "responses": {
+          "200": { "description": "Logged out successfully" }
+        }
+      }
+    },
 
     "/books": {
       "get": {
-        "summary": "Get all books",
-        "description": "Returns a list of all books, with author name populated.",
+        "tags": ["Books"],
+        "summary": "Get all books (public)",
         "produces": ["application/json"],
         "responses": {
           "200": { "description": "A list of books" },
@@ -21,8 +74,10 @@
         }
       },
       "post": {
-        "summary": "Create a new book",
-        "description": "Adds a new book to the library. All fields are required.",
+        "tags": ["Books"],
+        "summary": "Create a new book (protected)",
+        "description": "Requires GitHub OAuth login. Visit /auth/github first.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "parameters": [
@@ -34,15 +89,15 @@
               "type": "object",
               "required": ["title","isbn","authorId","genre","publishedYear","pageCount","language","publisher","summary"],
               "properties": {
-                "title":         { "type": "string",  "example": "The Great Gatsby" },
-                "isbn":          { "type": "string",  "example": "978-0-7432-7356-5" },
+                "title":         { "type": "string",  "example": "1984" },
+                "isbn":          { "type": "string",  "example": "978-0-451-52493-5" },
                 "authorId":      { "type": "string",  "example": "664f1a2b3c4d5e6f7a8b9c0d" },
-                "genre":         { "type": "string",  "example": "Fiction" },
-                "publishedYear": { "type": "integer", "example": 1925 },
-                "pageCount":     { "type": "integer", "example": 180 },
+                "genre":         { "type": "string",  "example": "Dystopian" },
+                "publishedYear": { "type": "integer", "example": 1949 },
+                "pageCount":     { "type": "integer", "example": 328 },
                 "language":      { "type": "string",  "example": "English" },
-                "publisher":     { "type": "string",  "example": "Scribner" },
-                "summary":       { "type": "string",  "example": "A story of the fabulously wealthy Jay Gatsby..." },
+                "publisher":     { "type": "string",  "example": "Secker & Warburg" },
+                "summary":       { "type": "string",  "example": "A chilling portrait of a totalitarian society." },
                 "available":     { "type": "boolean", "example": true }
               }
             }
@@ -50,14 +105,16 @@
         ],
         "responses": {
           "201": { "description": "Book created successfully" },
-          "400": { "description": "Validation error or duplicate ISBN" }
+          "400": { "description": "Validation error or duplicate ISBN" },
+          "401": { "description": "Unauthorized — login required" }
         }
       }
     },
 
     "/books/{id}": {
       "get": {
-        "summary": "Get a single book by ID",
+        "tags": ["Books"],
+        "summary": "Get a single book by ID (public)",
         "produces": ["application/json"],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "type": "string" }
@@ -69,7 +126,10 @@
         }
       },
       "put": {
-        "summary": "Update a book by ID",
+        "tags": ["Books"],
+        "summary": "Update a book by ID (protected)",
+        "description": "Requires GitHub OAuth login. Visit /auth/github first.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "parameters": [
@@ -98,17 +158,22 @@
         "responses": {
           "204": { "description": "Book updated successfully" },
           "400": { "description": "Validation error" },
+          "401": { "description": "Unauthorized — login required" },
           "404": { "description": "Book not found" }
         }
       },
       "delete": {
-        "summary": "Delete a book by ID",
+        "tags": ["Books"],
+        "summary": "Delete a book by ID (protected)",
+        "description": "Requires GitHub OAuth login. Visit /auth/github first.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "produces": ["application/json"],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "type": "string" }
         ],
         "responses": {
           "200": { "description": "Book deleted successfully" },
+          "401": { "description": "Unauthorized — login required" },
           "404": { "description": "Book not found" },
           "500": { "description": "Internal server error" }
         }
@@ -117,7 +182,8 @@
 
     "/authors": {
       "get": {
-        "summary": "Get all authors",
+        "tags": ["Authors"],
+        "summary": "Get all authors (public)",
         "produces": ["application/json"],
         "responses": {
           "200": { "description": "A list of authors" },
@@ -125,8 +191,10 @@
         }
       },
       "post": {
-        "summary": "Create a new author",
-        "description": "Adds a new author. All fields except website are required.",
+        "tags": ["Authors"],
+        "summary": "Create a new author (protected)",
+        "description": "Requires GitHub OAuth login. Visit /auth/github first.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "parameters": [
@@ -138,14 +206,14 @@
               "type": "object",
               "required": ["firstName","lastName","email","nationality","birthDate","biography","genres"],
               "properties": {
-                "firstName":   { "type": "string",  "example": "F. Scott" },
-                "lastName":    { "type": "string",  "example": "Fitzgerald" },
-                "email":       { "type": "string",  "example": "fscott@example.com" },
-                "nationality": { "type": "string",  "example": "American" },
-                "birthDate":   { "type": "string",  "example": "1896-09-24" },
-                "biography":   { "type": "string",  "example": "American novelist known for The Great Gatsby..." },
-                "website":     { "type": "string",  "example": "https://fscottfitzgerald.com" },
-                "genres":      { "type": "array", "items": { "type": "string" }, "example": ["Fiction","Classic"] },
+                "firstName":   { "type": "string",  "example": "George" },
+                "lastName":    { "type": "string",  "example": "Orwell" },
+                "email":       { "type": "string",  "example": "gorwell@example.com" },
+                "nationality": { "type": "string",  "example": "British" },
+                "birthDate":   { "type": "string",  "example": "1903-06-25" },
+                "biography":   { "type": "string",  "example": "English novelist known for 1984 and Animal Farm." },
+                "website":     { "type": "string",  "example": "https://georgeorwell.org" },
+                "genres":      { "type": "array", "items": { "type": "string" }, "example": ["Dystopian","Political Fiction"] },
                 "active":      { "type": "boolean", "example": true }
               }
             }
@@ -153,14 +221,16 @@
         ],
         "responses": {
           "201": { "description": "Author created successfully" },
-          "400": { "description": "Validation error or duplicate email" }
+          "400": { "description": "Validation error or duplicate email" },
+          "401": { "description": "Unauthorized — login required" }
         }
       }
     },
 
     "/authors/{id}": {
       "get": {
-        "summary": "Get a single author by ID",
+        "tags": ["Authors"],
+        "summary": "Get a single author by ID (public)",
         "produces": ["application/json"],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "type": "string" }
@@ -172,7 +242,10 @@
         }
       },
       "put": {
-        "summary": "Update an author by ID",
+        "tags": ["Authors"],
+        "summary": "Update an author by ID (protected)",
+        "description": "Requires GitHub OAuth login. Visit /auth/github first.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "parameters": [
@@ -200,21 +273,27 @@
         "responses": {
           "204": { "description": "Author updated successfully" },
           "400": { "description": "Validation error" },
+          "401": { "description": "Unauthorized — login required" },
           "404": { "description": "Author not found" }
         }
       },
       "delete": {
-        "summary": "Delete an author by ID",
+        "tags": ["Authors"],
+        "summary": "Delete an author by ID (protected)",
+        "description": "Requires GitHub OAuth login. Visit /auth/github first.",
+        "security": [{ "githubOAuth": ["user:email"] }],
         "produces": ["application/json"],
         "parameters": [
           { "name": "id", "in": "path", "required": true, "type": "string" }
         ],
         "responses": {
           "200": { "description": "Author deleted successfully" },
+          "401": { "description": "Unauthorized — login required" },
           "404": { "description": "Author not found" },
           "500": { "description": "Internal server error" }
         }
       }
     }
+
   }
 }
