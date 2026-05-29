@@ -10,6 +10,7 @@ const swaggerDocument = require('./swagger.json');
 const app = express();
 
 // ── Middleware ─────────────────────────────────────────────────────────────────
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 
@@ -20,7 +21,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // true on Render (HTTPS)
+      secure: false,
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
